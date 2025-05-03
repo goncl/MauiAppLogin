@@ -9,43 +9,40 @@ namespace MauiAppLogin
         {
             InitializeComponent();
 
-            // Página temporária com indicador de carregamento
-            MainPage = new ContentPage
-            {
-                Content = new ActivityIndicator
-                {
-                    IsRunning = true,
-                    VerticalOptions = LayoutOptions.Center,
-                    HorizontalOptions = LayoutOptions.Center
-                }
-            };
+            string? usuario_logado = null;
 
-            // Executa na thread principal
-            MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                try
-                {
-                    var usuario_logado = await SecureStorage.Default.GetAsync("usuario_logado");
+            // Enviando o usuário ara página de login por padrão.
+            MainPage = new Login();
 
-                    if (usuario_logado == null)
-                        MainPage = new Login();
-                    else
-                        MainPage = new Protegida();
-                }
-                catch (Exception ex)
+            Task.Run(async () =>
+            {
+                usuario_logado = await SecureStorage.Default.GetAsync("usuario_logado");
+
+                if (usuario_logado != null)
                 {
-                    await MainPage.DisplayAlert("Erro", $"Falha ao acessar dados seguros: {ex.Message}", "Fechar");
+                    MainPage = new Protegida();
+                }
+
+                /*if(usuario_logado == null)
+                {
                     MainPage = new Login();
-                }
+
+                } else
+                {
+                    MainPage = new Protegida();
+                }*/
             });
         }
 
         protected override Window CreateWindow(IActivationState activationState)
         {
             var window = base.CreateWindow(activationState);
+
             window.Width = 400;
             window.Height = 600;
+
             return window;
         }
-    }
-}
+
+    } // Fecha classe
+} // Fecha namespace
